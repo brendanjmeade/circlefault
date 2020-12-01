@@ -5,6 +5,7 @@ clear all;
 % basic_profiles()
 % rotelasticinter()
 % rdgrids()
+% approxscaling()
 
 nu = 0.25;
 nseg = 100;
@@ -104,65 +105,6 @@ set(gcf, "color", "w");
 export_fig("approx_scaling.pdf");
 return
 
-% figure("Position", [0, 0, 900, 300]);
-% % contourvec = 0:0.1:1;
-% contourvec = linspace(0, 1, 100);
-% subplot(1, 3, 1)
-% hold on;
-% contourf(xmat, ymat, reshape(umagrot, npts, npts), contourvec, 'edgecolor','none')
-% for i=1:numel(cx1)
-%     plot([cx1(i), cx2(i)], [cy1(i), cy2(i)], "-k", "linewidth", 1)
-% end
-% axis equal;
-% box on;
-% xticks([-100, 0, 100]);
-% yticks([-100, 0, 100]);
-% xlabel("x (km)");
-% ylabel("y (km)");
-% ch = colorbar;
-% colormap(cool);
-% ch.Ticks = [0, 0.5, 1.0]; %Create 8 ticks from zero to 1
-% ch.TickLabels = {"0.0", "0.5", "1.0"};
-% caxis([0 1]);
-% title("rotation", "fontweight", "normal")
-
-% subplot(1, 3, 2)
-% hold on;
-% contourf(xmat, ymat, reshape(umagshallow, npts, npts), contourvec, 'edgecolor','none')
-% for i=1:numel(cx1)
-%     plot([cx1(i), cx2(i)], [cy1(i), cy2(i)], "-k", "linewidth", 1)
-% end
-% axis equal;
-% box on;
-% xticks([-100, 0, 100]);
-% yticks([-100, 0, 100]);
-% xlabel("x (km)");
-% ylabel("y (km)");
-% ch = colorbar;
-% colormap(cool);
-% ch.Ticks = [0, 0.5, 1.0]; %Create 8 ticks from zero to 1
-% ch.TickLabels = {"0.0", "0.5", "1.0"};
-% caxis([0 1]);
-% title("elastic", "fontweight", "normal")
-
-% subplot(1, 3, 3)
-% hold on;
-% contourf(xmat, ymat, reshape(umagtotal, npts, npts), contourvec, 'edgecolor','none')
-% for i=1:numel(cx1)
-%     plot([cx1(i), cx2(i)], [cy1(i), cy2(i)], "-k", "linewidth", 1)
-% end
-% axis equal;
-% box on;
-% xticks([-100, 0, 100]);
-% yticks([-100, 0, 100]);
-% xlabel("x (km)");
-% ylabel("y (km)");
-% ch = colorbar;
-% colormap(cool);
-% ch.Ticks = [0, 0.5, 1.0]; %Create 8 ticks from zero to 1
-% ch.TickLabels = {"0.0", "0.5", "1.0"};
-% caxis([0 1]);
-% title("interseismic", "fontweight", "normal")
 
 
 
