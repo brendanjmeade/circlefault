@@ -5,108 +5,106 @@ clear all;
 % basic_profiles()
 % rotelasticinter()
 % rdgrids()
-% approxscaling()
+% approx_scaling()
 
-nu = 0.25;
-nseg = 100;
-dip = 90;
-D = 25;
-currentr = 200;
-rcurrentr = 100;
-npts = 200;
-xvec = linspace(0.001, rcurrentr, npts);
-yvec = linspace(0, rcurrentr, npts);
-[xmat, ymat] = meshgrid(xvec, yvec);
-xobs = xmat(:);
-yobs = ymat(:);
+function approx_scaling()
+    nu = 0.25;
+    nseg = 100;
+    dip = 90;
+    D = 25;
+    currentr = 200;
+    rcurrentr = 100;
+    npts = 200;
+    xvec = linspace(0.001, rcurrentr, npts);
+    yvec = linspace(0, rcurrentr, npts);
+    [xmat, ymat] = meshgrid(xvec, yvec);
+    xobs = xmat(:);
+    yobs = ymat(:);
 
-% Create circle
-[rcx1, rcy1, rcx2, rcy2] = discretizedarc(0, 360, rcurrentr, 100);
-[cx1, cy1, cx2, cy2] = discretizedarc(0, 360, currentr, 100);
-cx1 = cx1 + currentr;
-cx2 = cx2 + currentr;
-uxshallow = zeros(numel(xobs), 1);
-uyshallow = zeros(numel(yobs), 1);
-uxrot = zeros(numel(xobs), 1);
-uyrot = zeros(numel(yobs), 1);
+    % Create circle
+    [rcx1, rcy1, rcx2, rcy2] = discretizedarc(0, 360, rcurrentr, 100);
+    [cx1, cy1, cx2, cy2] = discretizedarc(0, 360, currentr, 100);
+    cx1 = cx1 + currentr;
+    cx2 = cx2 + currentr;
+    uxshallow = zeros(numel(xobs), 1);
+    uyshallow = zeros(numel(yobs), 1);
+    uxrot = zeros(numel(xobs), 1);
+    uyrot = zeros(numel(yobs), 1);
 
-% rotation component
-for i=1:length(xobs)
-    if inpolygon(xobs(i), yobs(i), cx1, cy1)
-        temp = cross([xobs(i)-currentr, yobs(i), 0], [0, 0, 1/currentr]);
-        uxrot(i) = temp(1);
-        uyrot(i) = temp(2);
+    % rotation component
+    for i=1:length(xobs)
+        if inpolygon(xobs(i), yobs(i), cx1, cy1)
+            temp = cross([xobs(i)-currentr, yobs(i), 0], [0, 0, 1/currentr]);
+            uxrot(i) = temp(1);
+            uyrot(i) = temp(2);
+        end
     end
-end
 
-% Elastic component
-for i=1:numel(cx1)
-    [strike, L, W, ofx, ofy, ~, ~, ~, ~, ~, ~] = fault_params_to_okada_form(cx1(i), cy1(i), ...
-                                                      cx2(i), cy2(i), ...
+    % Elastic component
+    for i=1:numel(cx1)
+        [strike, L, W, ofx, ofy, ~, ~, ~, ~, ~, ~] = fault_params_to_okada_form(cx1(i), cy1(i), ...
+                                                          cx2(i), cy2(i), ...
+                                                          deg_to_rad(dip), 20, 0);
+        [ux, uy, ~] = okada_plus_op(ofx, ofy, strike, 20, deg_to_rad(dip), L, W, 1, 0, 0, xobs, yobs, nu);
+        uxshallow = uxshallow + ux;
+        uyshallow = uyshallow + uy;
+    end
+    umagshallow = sqrt(uxshallow.^2 + uyshallow.^2);
+    umagrot = sqrt(uxrot.^2 + uyrot.^2);
+    umagtotal = sqrt((uxrot - uxshallow).^2 + (uyrot - uyshallow).^2);
+
+
+    % Small finite source
+    [strike, L, W, ofx, ofy, ~, ~, ~, ~, ~, ~] = fault_params_to_okada_form(0, -5, ...
+                                                      0, 5, ...
                                                       deg_to_rad(dip), 20, 0);
-    [ux, uy, ~] = okada_plus_op(ofx, ofy, strike, 20, deg_to_rad(dip), L, W, 1, 0, 0, xobs, yobs, nu);
-    uxshallow = uxshallow + ux;
-    uyshallow = uyshallow + uy;
-end
-umagshallow = sqrt(uxshallow.^2 + uyshallow.^2);
-umagrot = sqrt(uxrot.^2 + uyrot.^2);
-umagtotal = sqrt((uxrot - uxshallow).^2 + (uyrot - uyshallow).^2);
+    [uxf, uyf, ~] = okada_plus_op(ofx, ofy, strike, 20, deg_to_rad(dip), L, W, 1, 0, 0, xobs, yobs, nu);
+    umagf = sqrt(uxf.^2 + uyf.^2);
+    umagf = 1-umagf;
 
-
-% Small finite source
-[strike, L, W, ofx, ofy, ~, ~, ~, ~, ~, ~] = fault_params_to_okada_form(0, -5, ...
-                                                  0, 5, ...
-                                                  deg_to_rad(dip), 20, 0);
-[uxf, uyf, ~] = okada_plus_op(ofx, ofy, strike, 20, deg_to_rad(dip), L, W, 1, 0, 0, xobs, yobs, nu);
-umagf = sqrt(uxf.^2 + uyf.^2);
-umagf = 1-umagf;
-
-% Calculate displacment as a function of distance from the 
-dist = sqrt(xobs.^2 + yobs.^2);
-for i=1:length(xobs)
-    if ~inpolygon(xobs(i), yobs(i), rcx1, rcy1)
-        umagtotal(i) = 0;
-        umagf(i) = 0;
-        dist(i) = 0;
+    % Calculate displacment as a function of distance from the 
+    dist = sqrt(xobs.^2 + yobs.^2);
+    for i=1:length(xobs)
+        if ~inpolygon(xobs(i), yobs(i), rcx1, rcy1)
+            umagtotal(i) = 0;
+            umagf(i) = 0;
+            dist(i) = 0;
+        end
     end
+    delidx = find(dist == 0);
+    dist(delidx) = [];
+    umagtotal(delidx) = [];
+    umagf(delidx) = [];
+
+    % Remove observations that are not in circle
+    [dist, distsortidx] = sort(dist);
+    umagtotal = umagtotal(distsortidx);
+    umagf = umagf(distsortidx);
+
+    figure("Position", [0, 0, 600, 300]);
+    hold on;
+    plot(linspace(0, rcurrentr, 1000), 0.5+1/pi*atan(linspace(0, rcurrentr, 1000)/D), '-k', "linewidth", 2)
+    sp = csaps(dist, umagf, 0.5);
+    fnplt(sp, '-b');
+    sp = csaps(dist, umagtotal, 0.0005);
+    fnplt(sp, '-r');
+    lh = legend("infinitely long", "finite", "circle");
+    set(lh, "fontsize", 12);
+    set(lh, "location", "southeast");
+    legend boxoff;
+    box on;
+    xlabel("distance (km)");
+    ylabel("v (mm/yr)");
+    xlim([0.0, 50.0])
+    xticks([0.0, 25, 50])
+    ylim([0.25, 1.0])
+    yticks([0.25, 0.5, 0.75, 1.0])
+    yticklabels({"0.25", "0.50", "0.75", "1.00"})
+    set(gca, "TickDir", "out");
+    axis square;
+    set(gcf, "color", "w");
+    export_fig("approx_scaling.pdf");
 end
-delidx = find(dist == 0);
-dist(delidx) = [];
-umagtotal(delidx) = [];
-umagf(delidx) = [];
-
-% Remove observations that are not in circle
-[dist, distsortidx] = sort(dist);
-umagtotal = umagtotal(distsortidx);
-umagf = umagf(distsortidx);
-
-figure("Position", [0, 0, 600, 300]);
-hold on;
-plot(linspace(0, rcurrentr, 1000), 0.5+1/pi*atan(linspace(0, rcurrentr, 1000)/D), '-k', "linewidth", 2)
-sp = csaps(dist, umagf, 0.5);
-fnplt(sp, '-b');
-sp = csaps(dist, umagtotal, 0.0005);
-fnplt(sp, '-r');
-lh = legend("infinitely long", "finite", "circle");
-set(lh, "fontsize", 12);
-set(lh, "location", "southeast");
-legend boxoff;
-box on;
-xlabel("distance (km)");
-ylabel("v (mm/yr)");
-xlim([0.0, 50.0])
-xticks([0.0, 25, 50])
-ylim([0.25, 1.0])
-yticks([0.25, 0.5, 0.75, 1.0])
-yticklabels({"0.25", "0.50", "0.75", "1.00"})
-set(gca, "TickDir", "out");
-axis square;
-set(gcf, "color", "w");
-export_fig("approx_scaling.pdf");
-return
-
-
-
 
 function rdgrids()
 % Loop over radius and locking depth
