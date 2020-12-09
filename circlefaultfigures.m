@@ -1,78 +1,11 @@
 close all;
 clear all;
 
-% plot_schematic()
-% basic_profiles()
-% rotelasticinter()
-% rdgrids()
-% approx_scaling()
-
-
-% Let's look at the two disc problem
-sliprate1 = 1;
-sliprate2 = -1;
-r1 = 0.5;
-r2 = 0.5;
-xomega1 = r1;
-xomega2 = 2*r1 + r2;
-xeval = 2 * r1;
-omega1 = sliprate1 / (0 - xomega1);
-omega2 = sliprate2 / ((2*r1+2*r2) - xomega2);
-v1 = (xeval - xomega1) * omega1;
-v2 = (xeval - xomega2) * omega2;
-diffv = v1 - v2;
-
-
-% Create rotation and elastid effects for each disc
-nu = 0.25;
-nseg = 100;
-r = 25; % radius of circle
-dip = 90;
-ldep = 2000000;
-D = 20;
-nprofpts = 1000;
-xprof = linspace(-200, 300, nprofpts);
-nseg = 100;
-nprofpts = 1000;
-ldep = 1e10;
-dip = 90;
-nu = 0.25;
-
-% Circle 1
-[cx1, cy1, cx2, cy2] = discretizedarc(0, 360, r, nseg);
-cx1 = cx1 + r;
-cx2 = cx2 + r;
-yprof = zeros(size(xprof));
-uytotal1 = zeros(numel(xprof), 1);
-for i = 1:numel(cx1)
-   [strike, L, W, ofx, ofy, ~, ~, ~, ~, ~, ~] = fault_params_to_okada_form(cx1(i), cy1(i), cx2(i), cy2(i), deg_to_rad(dip), ldep, D);
-   [~, uy, ~] = okada_plus_op(ofx, ofy, strike, ldep, deg_to_rad(dip), L, W, 1, 0, 0, xprof, yprof, nu);
-   uytotal1 = uytotal1 + uy;
-end
-
-% Circle 2
-[cx1, cy1, cx2, cy2] = discretizedarc(0, 360, r, nseg);
-cx1 = cx1 + 3*r;
-cx2 = cx2 + 3*r;
-yprof = zeros(size(xprof));
-uytotal2 = zeros(numel(xprof), 1);
-for i = 1:numel(cx1)
-   [strike, L, W, ofx, ofy, ~, ~, ~, ~, ~, ~] = fault_params_to_okada_form(cx1(i), cy1(i), cx2(i), cy2(i), deg_to_rad(dip), ldep, D);
-   [~, uy, ~] = okada_plus_op(ofx, ofy, strike, ldep, deg_to_rad(dip), L, W, 1, 0, 0, xprof, yprof, nu);
-   uytotal2 = uytotal2 + uy;
-end
-
-figure;
-hold on;
-plot(xprof, uytotal1, "-r")
-plot(xprof, uytotal2, "-b")
-plot(xprof, uytotal1+uytotal2, "-k")
-
-
-
-return;
-
-
+plot_schematic()
+basic_profiles()
+rotelasticinter()
+rdgrids()
+approx_scaling()
 
 function approx_scaling()
     nu = 0.25;

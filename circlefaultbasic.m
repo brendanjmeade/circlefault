@@ -16,7 +16,7 @@ bdep = 0;
 
 
 % Create a bunch of elements in circle
-[cx1, cy1, cx2, cy2] = discretizedarc(0, 360, 1, 10);
+[cx1, cy1, cx2, cy2] = discretizedarc(0, 360, 1, 100);
 uxtotal = zeros(numel(xobs), 1);
 uytotal = zeros(numel(xobs), 1);
 uztotal = zeros(numel(xobs), 1);
