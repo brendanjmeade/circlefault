@@ -1,17 +1,18 @@
 close all;
-clear all;
+clear variables;
+addpath(genpath(pwd));
 
-plot_schematic()
-basic_profiles()
-rotelasticinter()
-rdgrids()
+% plot_schematic()
+% basic_profiles()
+% rotelasticinter()
+% rdgrids()
 approx_scaling()
 
 function approx_scaling()
     nu = 0.25;
     nseg = 100;
     dip = 90;
-    D = 25;
+    D = 15;
     currentr = 200;
     rcurrentr = 100;
     npts = 200;
@@ -83,10 +84,11 @@ function approx_scaling()
 
     figure("Position", [0, 0, 600, 300]);
     hold on;
-    plot(linspace(0, rcurrentr, 1000), 0.5+1/pi*atan(linspace(0, rcurrentr, 1000)/D), '-k', "linewidth", 2)
-    sp = csaps(dist, umagf, 0.5);
+    x_plot = linspace(0, rcurrentr, 1000);
+    plot(linspace(0, rcurrentr, 1000), (0.0+1/pi*atan(linspace(0, rcurrentr, 1000)/D)), '-k', "linewidth", 2)
+    sp = csaps(dist, umagf - 0.5, 0.5);
     fnplt(sp, '-b');
-    sp = csaps(dist, umagtotal, 0.0005);
+    sp = csaps(dist, 1*(umagtotal-0.355), 0.0005); % ad hoc normalization
     fnplt(sp, '-r');
     lh = legend("infinitely long", "finite", "circle");
     set(lh, "fontsize", 12);
@@ -97,9 +99,9 @@ function approx_scaling()
     ylabel("v (mm/yr)");
     xlim([0.0, 50.0])
     xticks([0.0, 25, 50])
-    ylim([0.25, 1.0])
-    yticks([0.25, 0.5, 0.75, 1.0])
-    yticklabels({"0.25", "0.50", "0.75", "1.00"})
+    ylim([0.00, 0.50])
+    yticks([0.00, 0.25, 0.50])
+    yticklabels({"0.00", "0.25", "0.50"})
     set(gca, "TickDir", "out");
     axis square;
     set(gcf, "color", "w");
@@ -171,11 +173,13 @@ function basic_profiles()
     r = 150; % radius of circle
     dip = 90;
     ldep = 2000000;
-    bdep = 20;
+    bdep = 15;
     nprofpts = 1000;
     xprof = linspace(-200, 200, nprofpts);
 
-    rvec = [25, 50, 100, 250, 500];
+%     rvec = [25, 50, 100, 250, 500];
+    rvec = [25, 50, 75, 100, 200, 500];
+    
     figure('Position', [0 0 300 300])
     set(gcf, "color", "w")
     hold on;
@@ -187,7 +191,7 @@ function basic_profiles()
     legend("SB73",...
            sprintf("r = %d (km)", rvec(1)), sprintf("r = %d (km)", rvec(2)),...
            sprintf("r = %d (km)", rvec(3)), sprintf("r = %d (km)", rvec(4)),...
-           sprintf("r = %d (km)", rvec(5)), "location", "northwest")
+           sprintf("r = %d (km)", rvec(5)), sprintf("r = %d (km)", rvec(6)), "location", "northwest")
     yticks([-0.5, 0.0, 0.5 1.0]);
     yticklabels({"-0.5", "0.0", "0.5", "1.0"});
     xlabel("x (km)");
